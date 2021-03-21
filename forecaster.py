@@ -90,7 +90,7 @@ max_days = 10
 forecast_days = np.linspace(1, max_days, max_days)
 count = 1
 accuracy = []
-epochs = 10
+epochs = 100
 
 fig, ax = plt.subplots(int(max_days/2), 2)
 
@@ -103,7 +103,7 @@ for day in forecast_days:
     tr_Y = tr_Y.astype('float32')
     te_Y = te_Y.astype('float32')
 
-    activation = 'relu'
+    activation = 'linear'
     model = Sequential()
     model.add(Dense(256, input_dim=time_step))
     model.add(Activation(activation))
