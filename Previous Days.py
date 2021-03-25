@@ -157,12 +157,12 @@ def print_accuracy(accuracies, steps_array):
 
 labels_filename = "data_2021-Mar-18.csv"    # Name of CSV file containing dataset
 column = ["date", "cumCasesBySpecimenDate"] # Columns of interest from the dataset
-forecast_days = 1   # Number of days in advance to be forecasted by neural network
-steps = np.linspace(25, 75, 10)     # Array of all previous days values to be used for training different neural Networks
+forecast_days = 5   # Number of days in advance to be forecasted by neural network
+steps = np.linspace(5, 50, 10)     # Array of all previous days values to be used for training different neural Networks
 count = 1   # Counter for keeping track of frame of current subplot to be generated
 accuracy = []
 epochs = 100
-error = 0.1     # Error margin used to determine the range of acceptable predictions for each known value
+error = 0.05     # Error margin used to determine the range of acceptable predictions for each known value
 fig, ax = plt.subplots(5, 2)    # Create figure for subplots
 
 for step in steps:
@@ -189,34 +189,20 @@ for step in steps:
     model.add(Dense(28))
     model.add(Activation(activation))
 
-    """
-    model.add(Dense(48))
-    model.add(Activation(activation))
-    #model.add(Dropout(0.2))
-    #model.add(BatchNormalization())
-    
-    model.add(Dense(12))
-    model.add(Activation(activation))
-    #model.add(Dropout(0.2))
-    #model.add(BatchNormalization())
-    
-    model.add(Dense(6))
-    model.add(Activation(activation))
-    #model.add(Dropout(0.2))
-    #model.add(BatchNormalization())
-    """
-
     model.add(Dense(forecast_days))   #Final layer has same number of neurons as number of forecasted days
     model.add(Activation('linear'))
 
     optimizer = optimizers.Nadam(learning_rate=0.0001)
 
     model.compile(loss='mean_squared_error', optimizer=optimizer, metrics=['mse'])
-            #es_callback = EarlyStopping(monitor='val_loss', patience=3)
-            # , callbacks=[es_callback]
+
+    # Introducing early stoppage
+    #es_callback = EarlyStopping(monitor='val_loss', patience=3) , callbacks=[es_callback]
+
     history = model.fit(tr_X, tr_Y, epochs=epochs)
-    #model.save("B1_NN_Model_new")
-    #print("Saved Neural Network Model")
+
+    # For Saving NN Model
+    #model.save("Covid_Forecaster")
 
     # Make predictions
     predictions = model.predict(te_X) * normalization

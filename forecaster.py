@@ -1,6 +1,5 @@
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Activation
-
 import matplotlib.pyplot as plt
 from tensorflow.keras import optimizers
 import numpy as np
@@ -30,7 +29,7 @@ def preprocess(days):
     """
     df = pd.read_csv(labels_filename, usecols=column)   # Opens csv file and extracts the columns for cases and dates
     dates_array = pd.read_csv(labels_filename, usecols=["date"]) # Opens same csv file but only extracts the dates
-    dates_array = dates_array.iloc[::-1]    # Reverses the array so that the start of the pandemic is at the start of the array
+    dates_array  = dates_array.iloc[::-1]    # Reverses the array so that the start of the pandemic is at the start of the array
     dates_array = dates_array.values.tolist()   # converts panda data frame to list
     dates_array = [datetime.datetime.strptime(d[0], "%Y-%m-%d").date() for d in dates_array]    # converts string dates to datetime format
     reversed_df = df.iloc[::-1]
@@ -116,9 +115,9 @@ def plot_predictions(dates_array, prediction_values, actual_values, frame, day_n
     :return: Counter for tracking subplots
     """
     axes = plt.subplot(int(max_days / 2), 2, frame)
-    axes.plot_date(dates_array[start_date:start_date + len(prediction_values)], prediction_values[:, -1] / 1e6, xdate=True,
+    axes.plot_date(dates_array[start_date:start_date + len(prediction_values)], prediction_values[:, -1] , xdate=True,
                  label='Prediction', linestyle='-', marker=' ', linewidth=2)
-    axes.plot_date(dates_array[start_date:start_date + len(prediction_values)], actual_values[:, -1] / 1e6, xdate=True, label='Actual',
+    axes.plot_date(dates_array[start_date:start_date + len(prediction_values)], actual_values[:, -1], xdate=True, label='Actual',
                  linestyle='-', marker=' ', linewidth=2)
 
     plt.title("Predicting " + str(int(day_num)) + " Days")
@@ -151,7 +150,7 @@ def print_accuracy(accuracies, days):
     Function for outputing the accuracy values for each Neural Network that were trained for varying number of input
     days.
     :param accuracies:  Array of accuracy values for each Neural Network
-    :param steps_array: Array containing the number of input days used for each network
+    :param days: Array containing the number of output forecasted days used for each network
     """
     for value, num_day in zip(accuracies, days):
         print(str(int(num_day)) + " Days in Advance: " + str(round(value*100, 2)) + "%")
@@ -159,12 +158,12 @@ def print_accuracy(accuracies, days):
 
 labels_filename = "data_2021-Mar-18.csv"    # Name of CSV file containing dataset
 column = ["date", "cumCasesBySpecimenDate"]     # Columns of interest from the dataset
-time_step = 30  # Number of previous days the Neural Network will take in as inputs
+time_step = 35  # Number of previous days the Neural Network will take in as inputs
 max_days = 10   # Number of forecasting days the Neural Network will try to predict
 forecast_days = np.linspace(1, max_days, max_days)
 count = 1   # Counter for keeping track of frame of current subplot to be generated
 accuracy = []
-epochs = 100
+epochs = 300
 error = 0.05    # Error margin used to determine the range of acceptable predictions for each known value
 
 fig, ax = plt.subplots(int(max_days/2), 2)  # Create figure for subplots
@@ -193,33 +192,19 @@ for day in forecast_days:
     model.add(Dense(28))
     model.add(Activation(activation))
 
-    """
-    model.add(Dense(48))
-    model.add(Activation(act1))
-    #model.add(Dropout(0.2))
-    #model.add(BatchNormalization())
-
-    model.add(Dense(12))
-    model.add(Activation(act1))
-    #model.add(Dropout(0.2))
-    #model.add(BatchNormalization())
-
-    model.add(Dense(6))
-    model.add(Activation(act1))
-    #model.add(Dropout(0.2))
-    #model.add(BatchNormalization())
-    """
     model.add(Dense(day))  # Final layer has same number of neurons as number of forecasted days
     model.add(Activation('linear'))
 
-    optimizer = optimizers.Nadam(learning_rate=0.0001)
+    optimizer = optimizers.Adam(learning_rate=0.0001)
 
     model.compile(loss='mean_squared_error', optimizer=optimizer, metrics=['mse'])
-    # es_callback = EarlyStopping(monitor='val_loss', patience=3)
-    # , callbacks=[es_callback]
+
+    # Introducing early stoppage
+    # es_callback = EarlyStopping(monitor='val_loss', patience=3), callbacks=[es_callback]
     history = model.fit(tr_X, tr_Y, epochs=epochs)
+
+    # For Saving NN Model
     # model.save("B1_NN_Model_new")
-    # print("Saved Neural Network Model")
 
     # Make predictions
     predictions = model.predict(te_X) * normalization

@@ -91,11 +91,11 @@ def plot_cost_vs_epoch(axes, history_array, optimiser_type, frame):
 
 labels_filename = "data_2021-Mar-18.csv"    # Name of CSV file containing dataset
 column = ["date", "cumCasesBySpecimenDate"]     # Columns of interest from the dataset
-time_step = 30  # Number of previous days the Neural Network will take in as inputs
-forecast_days = 1   # Number of days in advance to be forecasted by neural network
+time_step = 35  # Number of previous days the Neural Network will take in as inputs
+forecast_days = 3   # Number of days in advance to be forecasted by neural network
 optimisers = ("Adam", "Nadam", "SGD", "RMSprop")
 count = 1   # Counter for keeping track of frame of current subplot to be generated
-epochs = 10
+epochs = 300
 
 # Generate training and testing datasets
 tr_X, tr_Y, te_X, te_Y, normalization, X, Y, dates, start_date = get_data()
@@ -121,29 +121,20 @@ for optimiser in optimisers:
 
     model.add(Dense(28))
     model.add(Activation(activation))
-    """
-    model.add(Dense(48))
-    model.add(Activation(act1))
-    #model.add(Dropout(0.2))
-    #model.add(BatchNormalization())
 
-    model.add(Dense(12))
-    model.add(Activation(act1))
-    #model.add(Dropout(0.2))
-    #model.add(BatchNormalization())
-
-    model.add(Dense(6))
-    model.add(Activation(act1))
-    #model.add(Dropout(0.2))
-    #model.add(BatchNormalization())
-    """
     model.add(Dense(forecast_days))  # Final layer has same number of neurons as classes
     model.add(Activation('linear'))
 
     model.compile(loss='mean_squared_error', optimizer=optimiser, metrics=['mse'])
-    # es_callback = EarlyStopping(monitor='val_loss', patience=3)
-    # , callbacks=[es_callback]
+
+    # Introducing early stoppage
+    # es_callback = EarlyStopping(monitor='val_loss', patience=3), callbacks=[es_callback]
+
     history = model.fit(tr_X, tr_Y, epochs=epochs)
+
+    # For Saving NN Model
+    # model.save("B1_NN_Model_new")
+
     # Create subplot for current Neural Network learning history
     count = plot_cost_vs_epoch(ax, history, optimiser, count)
 

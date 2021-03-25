@@ -1,6 +1,5 @@
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Activation
-
 import matplotlib.pyplot as plt
 from tensorflow.keras import optimizers
 import numpy as np
@@ -115,9 +114,9 @@ def plot_predictions(dates_array, prediction_values, actual_values, frame, activ
     :return: Counter for tracking subplots
     """
     axes = plt.subplot(2, 2, frame)
-    axes.plot_date(dates_array[start_date:start_date + len(prediction_values)], prediction_values[:, -1] / 1e6, xdate=True,
+    axes.plot_date(dates_array[start_date:start_date + len(prediction_values)], prediction_values[:, -1] , xdate=True,
                  label='Prediction', linestyle='-', marker=' ', linewidth=2)
-    axes.plot_date(dates_array[start_date:start_date + len(prediction_values)], actual_values[:, -1] / 1e6, xdate=True, label='Actual',
+    axes.plot_date(dates_array[start_date:start_date + len(prediction_values)], actual_values[:, -1] , xdate=True, label='Actual',
                  linestyle='-', marker=' ', linewidth=2)
 
     plt.title(activation_function + " Function")
@@ -158,12 +157,12 @@ def print_accuracy(accuracies, functions):
 
 labels_filename = "data_2021-Mar-18.csv"    # Name of CSV file containing dataset
 column = ["date", "cumCasesBySpecimenDate"] # Columns of interest from the dataset
-time_step = 30  # Number of previous days the Neural Network will take in as inputs
+time_step = 35  # Number of previous days the Neural Network will take in as inputs
 forecast_days = 1   # Number of days in advance to be forecasted by neural network
 count = 1    # Counter for keeping track of frame of current subplot to be generated
 accuracy = []
-epochs = 100
-error = 0.1     # Error margin used to determine the range of acceptable predictions for each known value
+epochs = 300
+error = 0.01     # Error margin used to determine the range of acceptable predictions for each known value
 activation_functions = ("tanh", "relu", "sigmoid", "linear")
 
 fig, ax = plt.subplots(2, 2)    # Create figure for subplots
@@ -191,33 +190,20 @@ for activation in activation_functions:
     model.add(Dense(28))
     model.add(Activation(activation))
 
-    """
-    model.add(Dense(48))
-    model.add(Activation(act1))
-    #model.add(Dropout(0.2))
-    #model.add(BatchNormalization())
-
-    model.add(Dense(12))
-    model.add(Activation(act1))
-    #model.add(Dropout(0.2))
-    #model.add(BatchNormalization())
-
-    model.add(Dense(6))
-    model.add(Activation(act1))
-    #model.add(Dropout(0.2))
-    #model.add(BatchNormalization())
-    """
     model.add(Dense(forecast_days))  # Final layer has same number of neurons as number of forecasted days
     model.add(Activation('linear'))
 
     optimizer = optimizers.Nadam(learning_rate=0.0001)
 
     model.compile(loss='mean_squared_error', optimizer=optimizer, metrics=['mse'])
-    # es_callback = EarlyStopping(monitor='val_loss', patience=3)
-    # , callbacks=[es_callback]
+
+    # Introducing early stoppage
+    # es_callback = EarlyStopping(monitor='val_loss', patience=3), callbacks=[es_callback]
+
     history = model.fit(tr_X, tr_Y, epochs=epochs)
+
+    # For Saving NN Model
     # model.save("B1_NN_Model_new")
-    # print("Saved Neural Network Model")
 
     # Make predictions
     predictions = model.predict(te_X) * normalization
