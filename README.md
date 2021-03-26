@@ -42,6 +42,18 @@
 - Plots graph of the loss function for the training process for each optimiser
 
 
+## world_predictions.py
+- Tested Neural Network on entire world cumulative case count
+- Preprocesses data accordingly and trains neural network
+- Makes predictions and plots comparisons with actual values
+- Kept in as example of alternative method
+
+## LSTM.py
+- Tested Neural Network using LSTM layers
+- Preprocesses data accordingly and trains neural network
+- Makes predictions and plots comparisons with actual values
+- Kept in as example of alternative method
+
 #### System used for training Models
 Computational times provided in this READ.me are based off the following system configurations:
  - Intel Core i7-8750H	2.2-4.1GHz	6/12 cores	9 MB cache
