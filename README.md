@@ -65,3 +65,15 @@ Computational times provided in this READ.me are based off the following system 
 - Pandas 1.1.3
 - Tensorflow 2.1.0
 - Keras 2.3.1
+
+### Installing Packages
+
+- Create Anaconda environment running python 3.7.9
+- Install the Numpy, OpenCV, Pandas, Tensorflow, Keras, Scikit-learn packages from the Anaconda Navigator
+- For Windows
+    - Ensure that Visual studio is installed on your desktop
+    - Run "pip install cmake" and "pip install dlib"
+- For other operating systems
+    - Follow instuctions at https://www.pyimagesearch.com/2018/01/22/install-dlib-easy-complete-guide/
+    
+
