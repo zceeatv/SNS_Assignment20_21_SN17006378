@@ -81,8 +81,8 @@ def plot_predictions(prediction_values, actual_values):
     """
     plt.figure()
     x = np.linspace(1, len(prediction_values), len(prediction_values))
-    plt.plot_date(x, prediction_values[:, -1], xdate=True, label='predictions', linestyle='-', marker=' ', linewidth=2)
-    plt.plot_date(x, actual_values[:, -1], xdate=True, label='actual', linestyle='-', marker=' ', linewidth=2)
+    plt.plot(x, prediction_values[:, -1], label='predictions', linestyle='-', marker=' ', linewidth=2)
+    plt.plot(x, actual_values[:, -1], label='actual', linestyle='-', marker=' ', linewidth=2)
     plt.xlabel('Day')
     plt.ylabel('Cumulative Cases')
     plt.title('Covid Forecaster predictions')
@@ -90,6 +90,7 @@ def plot_predictions(prediction_values, actual_values):
     plt.grid(b=True, which='major', color='#666666', linestyle='-')
     plt.minorticks_on()
     plt.grid(b=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
+    plt.legend()
 
 
 tr_X, tr_Y, va_X, va_Y, te_X, te_Y, normalization = get_data()
