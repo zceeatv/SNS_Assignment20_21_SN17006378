@@ -122,9 +122,9 @@ def calc_accuracy(prediction_values, actual_values, error_margin):
 labels_filename = "data_2021-Mar-18.csv"    # Name of CSV file containing dataset
 column = ["date", "cumCasesBySpecimenDate"] # Columns of interest from the dataset
 time_step = 35  # Number of previous days the Neural Network will take in as inputs
-forecast_days = 50   # Number of days in advance to be forecasted by neural network
+forecast_days = 10   # Number of days in advance to be forecasted by neural network
 epochs = 300
-error = 0.2    # Error margin used to determine the range of acceptable predictions for each known value
+error = 0.05    # Error margin used to determine the range of acceptable predictions for each known value
 
 # Generate training and testing datasets
 tr_X, tr_Y, te_X, te_Y, normalization, X, Y, dates, start_date = get_data()

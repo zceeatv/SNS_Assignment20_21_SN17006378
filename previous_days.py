@@ -161,7 +161,7 @@ forecast_days = 5   # Number of days in advance to be forecasted by neural netwo
 steps = np.linspace(5, 50, 10)     # Array of all previous days values to be used for training different neural Networks
 count = 1   # Counter for keeping track of frame of current subplot to be generated
 accuracy = []
-epochs = 100
+epochs = 300
 error = 0.05     # Error margin used to determine the range of acceptable predictions for each known value
 fig, ax = plt.subplots(5, 2)    # Create figure for subplots
 

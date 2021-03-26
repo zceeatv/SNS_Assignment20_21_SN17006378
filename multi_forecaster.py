@@ -29,7 +29,7 @@ def preprocess(days):
     """
     df = pd.read_csv(labels_filename, usecols=column)   # Opens csv file and extracts the columns for cases and dates
     dates_array = pd.read_csv(labels_filename, usecols=["date"]) # Opens same csv file but only extracts the dates
-    dates_array  = dates_array.iloc[::-1]    # Reverses the array so that the start of the pandemic is at the start of the array
+    dates_array = dates_array.iloc[::-1]    # Reverses the array so that the start of the pandemic is at the start of the array
     dates_array = dates_array.values.tolist()   # converts panda data frame to list
     dates_array = [datetime.datetime.strptime(d[0], "%Y-%m-%d").date() for d in dates_array]    # converts string dates to datetime format
     reversed_df = df.iloc[::-1]

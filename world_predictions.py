@@ -1,19 +1,13 @@
-from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.layers import Dense, Dropout, Flatten, BatchNormalization, Activation, MaxPooling2D, Conv2D
-from keras.constraints import maxnorm
-from keras.utils import np_utils
-from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Activation
 import matplotlib.pyplot as plt
 from tensorflow.keras import optimizers
 import numpy as np
-import os
-from os.path import dirname, abspath, split
 import pandas as pd
 labels_filename = "time_series_covid19_confirmed_global.csv"
 column = ["Province/State", "Country/Region", "Lat", "Long"]
 time_step = 14
 forecast_days = 1
-#def loss_function(y_true, y_pred):
 
 def preprocess():
     history = []
@@ -37,25 +31,8 @@ def preprocess():
     history = np.array(history) / normalization_factor
     forecast = np.array(forecast) / normalization_factor
     return history, forecast, normalization_factor
-    #normalization_factor = reversed_df["cumCasesBySpecimenDate"].max()
-    #reversed_df = reversed_df.to_numpy()
-    #print(reversed_df[0:14, 1])
-    #for i in reversed_df:
-    #    print(i[1])
-    #print(len(df))
-    """
-    numOfDataEntries = len(reversed_df)-(time_step + forecast_days)
-    iteration = 0
-    history = []
-    forecast = []
-    while iteration < numOfDataEntries:
-        history.append(reversed_df[iteration:time_step + iteration, 1])
-        forecast.append(reversed_df[iteration+time_step:+ iteration+time_step + forecast_days, 1])
-        iteration += 1
-    history = np.array(history)/normalization_factor
-    forecast = np.array(forecast)/normalization_factor
-    return history, forecast, normalization_factor
-    """
+
+
 def get_data():
     X, Y, normalization = preprocess()
     dataset_size = X.shape[0]
@@ -70,6 +47,51 @@ def get_data():
 
     return tr_X, tr_Y, va_X, va_Y, te_X, te_Y, normalization
 
+
+def calc_accuracy(prediction_values, actual_values, error_margin):
+    """
+    Function for determining the performance of the Neural Network by comparing the predicted values from the network
+    to known cases. The use of an error margin defines the offset of the predicted value from the real value for which
+    is acceptable and considered as a correct prediction
+    :param prediction_values: Array of predicted values
+    :param actual_values: Array of known values
+    :param error_margin: Fractional value used to define the acceptable range for the predictions
+    :return: Updated array of performances with the current Neural Network score
+    """
+    correct = 0
+    for prediction, known in zip(prediction_values, actual_values):     # Goes through each data entry of prediction and actual arrays
+        for prediction_item, known_item in zip(prediction, known):      # Nested for loop to then iterate through each prediction and actual values for the current data entry
+            if prediction_item > known_item and prediction_item < known_item + (known_item*error_margin):   # Determines whether the predicted value is greater than actual value but lies within the suitable range
+                correct += 1
+            elif prediction_item < known_item and prediction_item > known_item - (known_item*error_margin): # Determines whether the predicted value is less than actual value but lies within the suitable range
+                correct += 1
+            elif prediction_item == known_item:
+                correct += 1
+    return correct/(len(predictions)*len(predictions[1]))
+
+
+def plot_predictions(prediction_values, actual_values):
+    """
+    For building a series of subplots for showing the predicted values and actual values for each Neural Network model
+    that were trained using different number of inputs (previous days)
+    :param prediction_values: Array of predicts from the Neural Network
+    :param actual_values: Array of actual case values taken from the dataset
+
+    :return: Counter for tracking subplots
+    """
+    plt.figure()
+    x = np.linspace(1, len(prediction_values), len(prediction_values))
+    plt.plot_date(x, prediction_values[:, -1], xdate=True, label='predictions', linestyle='-', marker=' ', linewidth=2)
+    plt.plot_date(x, actual_values[:, -1], xdate=True, label='actual', linestyle='-', marker=' ', linewidth=2)
+    plt.xlabel('Day')
+    plt.ylabel('Cumulative Cases')
+    plt.title('Covid Forecaster predictions')
+    # Generate grid lines
+    plt.grid(b=True, which='major', color='#666666', linestyle='-')
+    plt.minorticks_on()
+    plt.grid(b=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
+
+
 tr_X, tr_Y, va_X, va_Y, te_X, te_Y, normalization = get_data()
 tr_X = tr_X.astype('float32')
 va_X = va_X.astype('float32')
@@ -80,54 +102,30 @@ te_Y = te_X.astype('float32')
 
 model = Sequential()
 model.add(Dense(256, input_dim=time_step))
-model.add(Activation('tanh'))
-#model.add(Dropout(0.2))
-#model.add(BatchNormalization())
+model.add(Activation('linear'))
 
 model.add(Dense(96))
-model.add(Activation('tanh'))
-#model.add(Dropout(0.2))
-#model.add(BatchNormalization())
-
+model.add(Activation('linear'))
 
 model.add(Dense(48))
-model.add(Activation('tanh'))
-#model.add(Dropout(0.2))
-#model.add(BatchNormalization())
+model.add(Activation('linear'))
 
 model.add(Dense(28))
-model.add(Activation('tanh'))
-#model.add(Dropout(0.2))
-#model.add(BatchNormalization())
-
-model.add(Dense(48))
-model.add(Activation('tanh'))
-#model.add(Dropout(0.2))
-#model.add(BatchNormalization())
-
-model.add(Dense(12))
-model.add(Activation('tanh'))
-#model.add(Dropout(0.2))
-#model.add(BatchNormalization())
-
-model.add(Dense(6))
-model.add(Activation('tanh'))
-#model.add(Dropout(0.2))
-#model.add(BatchNormalization())
+model.add(Activation('linear'))
 
 model.add(Dense(1))   #Final layer has same number of neurons as classes
-model.add(Activation('relu'))
+model.add(Activation('linear'))
 
-epochs = 1000
-#batch_size = 64
-optimizer = optimizers.RMSprop()
+epochs = 100
+optimizer = optimizers.Adam(learning_rate=0.001)
 
-model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
+model.compile(loss='mse', optimizer=optimizer, metrics=['mse'])
         #es_callback = EarlyStopping(monitor='val_loss', patience=3)
         # , callbacks=[es_callback]
 history = model.fit(tr_X, tr_Y, validation_data=(va_X, va_Y), epochs=epochs)
+
 #model.save("B1_NN_Model_new")
-print("Saved Neural Network Model")
+#print("Saved Neural Network Model")
 """
         plt.plot(history.history['loss'],marker='x')
         plt.plot(history.history['val_loss'], marker='x')
@@ -139,6 +137,13 @@ print("Saved Neural Network Model")
         plt.show()
 """
 # Model evaluation
-scores = model.evaluate(te_X, te_Y, verbose=0)
-print("Accuracy: %.2f%%" % (scores[1]*100))
-#return history.history["accuracy"][epochs - 1] * 100, scores[1] * 100
+predictions = model.predict(te_X) * normalization
+actual = te_Y * normalization
+predictions = predictions.astype("int")
+actual = actual.astype("int")
+
+# Plot graph of predictions and actual covid cases
+plot_predictions(predictions, actual)
+accuracy = calc_accuracy(predictions, actual, 0.05)
+print("Accuracy of Model: " + str(round(accuracy*100, 2))+"%")
+plt.show()
