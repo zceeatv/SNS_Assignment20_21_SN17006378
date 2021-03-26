@@ -54,19 +54,19 @@
 - Makes predictions and plots comparisons with actual values
 - Kept in as example of alternative method
 
-#### System used for training Models
+## System used for training Models
 Computational times provided in this READ.me are based off the following system configurations:
  - Intel Core i7-8750H	2.2-4.1GHz	6/12 cores	9 MB cache
  - Nvidia Quadro P1000	640 CUDA 1.49-1.52GHz	4 GB GDDR5
  - Setup of CUDA toolkit allowing Quadro P1000 for use in training tenserflow models
  
-### Packages requirements:
+## Packages requirements:
 - Numpy 1.19.2
 - Pandas 1.1.3
 - Tensorflow 2.1.0
 - Keras 2.3.1
 
-### Installing Packages
+## Installing Packages
 
 - Create Anaconda environment running python 3.7.9
 - Install the Numpy, OpenCV, Pandas, Tensorflow, Keras, Scikit-learn packages from the Anaconda Navigator
